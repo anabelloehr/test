@@ -31,6 +31,7 @@ consumption_percentage = st.sidebar.number_input("(% more or less than manufactu
 
 ## SIDEBAR SECTION 2: LCI 
 st.sidebar.header("LCI")
+
 ### SIDEBAR SECTION 2.1: PRODUCTION STAGE 
 # TAKE PRODUCTION INPUT
 st.sidebar.subheader ("Production Stage")
@@ -59,6 +60,7 @@ electricity_shares_natural_gas = st.sidebar.number_input("Natural Gas:")
 
 ## SIDEBAR SECTION 2.3: END OF LIFE STAGE 
 st.sidebar.subheader ("End of Life Stage")
+
 # TAKE RECYCLING INPUT
 # radio button
 Recycling = st.sidebar.selectbox("Recycling type", ['Pyrometallurgy', 'Hydrometallurgy', 'Reuse'], help="...")
@@ -113,6 +115,7 @@ with tab1:
 with tab2:
  st.header("Analysis")
  "To analyze and interpret the results in more detail..."
+ 
  # TAKE CAR TYPE SETTINGS
  with st.expander("Choose types of cars and drives to compare:"):
      "#### Car 1:"
