@@ -11,7 +11,6 @@ st.set_page_config(
 # SIDEBAR
 ## SIDEBAR SECTION 1: PARAMETER
 st.sidebar.header("Parameter")
-#...find out whether tooltip with markdown possible, then set collapse again
 
 # TAKE LIFESPAN INPUT
 Lifespan = st.sidebar.slider("Lifespan", 0.1, 8.0, 1.0, help="...", label_visibility="visible")  # min, max, default
@@ -149,6 +148,7 @@ with tab2:
 
         with col2:
             select_drive4 = st.selectbox("Type of Drive Train:", ['ICEV petrol', '...'], key='car4.2')
+     
      "#### Car 5:"
      with st.container():
         col1, col2 = st.columns(2)
@@ -163,6 +163,7 @@ with tab2:
 
 # DISPLAY CHART TO COMPARE CARS
 "Here you can see and compare the different climate change impacts..."
+
 #...chart"
 "...Hier kommt später ein Graph hin..."
 
