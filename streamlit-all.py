@@ -116,7 +116,6 @@ with tab2:
  "To analyze and interpret the results in more detail..."
  # TAKE CAR TYPE SETTINGS
  with st.expander("Choose types of cars and drives to compare:"):
-    ##...see if there's a way to put them side by side
      "#### Car 1:"
      with st.container():
         col1, col2 = st.columns(2)
@@ -124,6 +123,7 @@ with tab2:
             select_cartype1 = st.selectbox("Car Type:", ['None', '...'], key='car1.1')
         with col2:
             select_drive1 = st.selectbox("Type of Drive Train:", ['ICEV petrol', '...'], key='car1.2')
+     
      "#### Car 2:"
      with st.container():
         col1, col2 = st.columns(2)
@@ -132,6 +132,7 @@ with tab2:
 
         with col2:
             select_drive2 = st.selectbox("Type of Drive Train:", ['ICEV petrol', '...'], key='car2.2')
+     
      "#### Car 3:"
      with st.container():
         col1, col2 = st.columns(2)
@@ -139,6 +140,7 @@ with tab2:
             select_cartype3 = st.selectbox("Car Type:", ['None', '...'], key='car3.1')
         with col2:
             select_drive3 = st.selectbox("Type of Drive Train:", ['ICEV petrol', '...'], key='car3.2')
+     
      "#### Car 4:"
      with st.container():
         col1, col2 = st.columns(2)
@@ -157,8 +159,6 @@ with tab2:
 
 # START ANALYSIS
  st.button('Start Analysis')
- #...try styling button through adding a streamlit widget key as “a class” to element classes
- #...combine with select boxes
  st.markdown("""---""")
 
 # DISPLAY CHART TO COMPARE CARS
