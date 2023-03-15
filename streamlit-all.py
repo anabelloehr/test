@@ -10,7 +10,7 @@ st.set_page_config(
 
 # SIDEBAR
 ## SIDEBAR SECTION 1: PARAMETER
-st.sidebar.header("Parameter")
+st.sidebar.title("Parameter")
 
 # TAKE LIFESPAN INPUT
 Lifespan = st.sidebar.slider("Lifespan", 0.1, 8.0, 1.0, help="...", label_visibility="visible")  # min, max, default
@@ -28,9 +28,11 @@ consumption = st.sidebar.radio('Consumption',
 # select number input
 consumption_percentage = st.sidebar.number_input("(% more or less than manufacturer)", label_visibility="collapsed")
 
+st.sidebar.markdown("")
+st.sidebar.markdown("")
 
 ## SIDEBAR SECTION 2: LCI 
-st.sidebar.header("LCI")
+st.sidebar.title("LCI")
 
 ### SIDEBAR SECTION 2.1: PRODUCTION STAGE 
 # TAKE PRODUCTION INPUT
@@ -164,9 +166,9 @@ with tab2:
  st.button('Start Analysis')
  st.markdown("""---""")
 
-# DISPLAY CHART TO COMPARE CARS
-"Here you can see and compare the different climate change impacts..."
+ # DISPLAY CHART TO COMPARE CARS
+ "Here you can see and compare the different climate change impacts..."
 
-#...chart"
-"...Hier kommt später ein Graph hin..."
+ #...chart"
+ "...Hier kommt später ein Graph hin..."
 
