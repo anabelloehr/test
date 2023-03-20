@@ -11,53 +11,60 @@ st.set_page_config(
 # SIDEBAR
 ## SIDEBAR SECTION 1: PARAMETER
 st.sidebar.title("Parameter")
+st.sidebar.header("1. Definition of goal and scope")
 
 # TAKE LIFESPAN INPUT
-Lifespan = st.sidebar.slider("Lifespan", 0.1, 8.0, 1.0, help="...", label_visibility="visible")  # min, max, default
+Lifespan = st.sidebar.slider("Lifespan (a)", 5, 30, 12, help="Choose how many years will the car be used?", label_visibility="visible")  # min, max, default
 
 # TAKE MILEAGE INPUT
-Mileage = st.sidebar.slider("Mileage", 0.1, 8.0, 1.0, help="...", label_visibility="visible")  # min, max, default
+Mileage = st.sidebar.slider("Mileage (10.000 km)", 1, 30, 12, help="How much mileage in thousand kilometer per year should be considered?", label_visibility="visible")  # min, max, default
 
 # TAKE URBAN LIVING INPUT
-Urban = st.sidebar.slider("Urban Living", 0.1, 8.0, 1.0, help="...", label_visibility="visible")  # min, max, default
+Urban = st.sidebar.slider("Share of Urban Driving (%)", 0, 100, 50, step=5, help="What share is driven in urban areas? The rest is allocated to driving in the country (highway or country road)", label_visibility="visible")  # min, max, default
 
 # TAKE CONSUMPTION INPUT
 # radio button
-consumption = st.sidebar.radio('Consumption',
-                  ('Manufacturer data', 'ADAC driving profiles', 'Or choose own percentage:'), help="... For the own percentage option: choose % more or less than manufacturer")
+consumption = st.sidebar.radio('Consumption (basis)', ('Manufacturer data', 'ADAC driving profiles', 'Or choose own percentage:'), help="How is the driving consumption estimated? For the own percentage option: choose % more or less than manufacturer")
+######die Werte für die Labels (maufacturer data 0.65, 1) einsetzen
+
 # select number input
-consumption_percentage = st.sidebar.number_input("(% more or less than manufacturer)", label_visibility="collapsed")
+consumption_percentage = st.sidebar.number_input("(% more or less than manufacturer)", -60, 60, 0, 5, label_visibility="collapsed")
 
 st.sidebar.markdown("")
 st.sidebar.markdown("")
+
 
 ## SIDEBAR SECTION 2: LCI 
-st.sidebar.title("LCI")
+st.sidebar.header("2. Life cycle inventory")
 
 ### SIDEBAR SECTION 2.1: PRODUCTION STAGE 
 # TAKE PRODUCTION INPUT
 st.sidebar.subheader ("Production Stage")
-select_production = st.sidebar.selectbox("Production", ['Electricity Mix', '...'], help="...")
+select_production = st.sidebar.selectbox("Production", ['Electricity Mix', 'From renewable energy sources', 'Fossil fuel based'], help="How is the electricity for the production processes of the batteries, fuel cells and other materials generated?")
 
 ### SIDEBAR SECTION 2.2: USE STAGE 
 st.sidebar.subheader ("Use Stage")
 
 # TAKE HYDROGEN INPUT
-select_hydrogen = st.sidebar.selectbox("Hydrogen", ['Natural Gas Reforming', '...'], help="...")
+select_hydrogen = st.sidebar.selectbox("Hydrogen", ['Natural Gas Reforming', 'Electrolysis from electricity mix', 'Electrolysis renewable energy sources'], help="How is the utilized hydrogen produced?")
+######die Werte für die Labels (13.3, 23, 0.866) einsetzen mit denen gerechnet wird
 
 # TAKE ELECTRICITY INPUT
 # radio button
-electricity = st.sidebar.radio('Electricity',
-                  ('Electricity mix', 'From renewable energy sources', 'Fossil fuel based', 'Or choose shares [%]:'), help="...")
+electricity = st.sidebar.radio('Electricity', ('Electricity mix', 'From renewable energy sources', 'Fossil fuel based', 'Or choose shares [%]:'), help="How is the electricity used for charging produced?")
+######die Werte für die Labels einsetzen mit denen gerechnet wird
+
 # select number inputs
-electricity_shares_pv = st.sidebar.number_input("PV:")
-electricity_shares_wind = st.sidebar.number_input("Wind:")
-electricity_shares_water = st.sidebar.number_input("Water:")
-electricity_shares_biomass = st.sidebar.number_input("Biomass:")
-electricity_shares_lignite = st.sidebar.number_input("Lignite:")
-electricity_shares_hard_coal = st.sidebar.number_input("Hard Coal:")
-electricity_shares_nuclear = st.sidebar.number_input("Nuclear:")
-electricity_shares_natural_gas = st.sidebar.number_input("Natural Gas:")
+el_pv_input = st.sidebar.number_input("PV:", 0, 100, 0, 1)
+el_wind_input = st.sidebar.number_input("Wind:", 0, 100, 0, 1)
+el_water_input = st.sidebar.number_input("Water:", 0, 100, 0, 1)
+el_biomass_input = st.sidebar.number_input("Biomass:", 0, 100, 0, 1)
+el_lignite_input = st.sidebar.number_input("Lignite:", 0, 100, 0, 1)
+el_hard_coal_input = st.sidebar.number_input("Hard Coal:", 0, 100, 0, 1)
+el_nuclear_input = st.sidebar.number_input("Nuclear:", 0, 100, 0, 1)
+el_natural_gas_input = st.sidebar.number_input("Natural Gas:", 0, 100, 0, 1)
+
+######rausfinden ob die number inputs verbinden kann/muss, zB als 1 variable
 
 
 ## SIDEBAR SECTION 2.3: END OF LIFE STAGE 
@@ -65,7 +72,7 @@ st.sidebar.subheader ("End of Life Stage")
 
 # TAKE RECYCLING INPUT
 # radio button
-Recycling = st.sidebar.selectbox("Recycling type", ['Pyrometallurgy', 'Hydrometallurgy', 'Reuse'], help="...")
+Recycling = st.sidebar.selectbox("Recycling type", ['Pyrometallurgy', 'Hydrometallurgy', 'Reuse'], help="What recycling process is utilized for the battery?")
 
 st.sidebar.markdown("")
 st.sidebar.markdown("")
@@ -73,7 +80,7 @@ st.sidebar.markdown("")
 
 # SIDEBAR: SET PARAMETERS
 st.sidebar.button('Set Parameters')
-
+########add was passiert on click
 
 
 # MAIN AREA
