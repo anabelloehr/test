@@ -2,7 +2,22 @@
 
 #... means this still needs to be figured out & added
 
+
+## Importing relevant libaries/modules
 import streamlit as st
+import matplotlib.pyplot as plt
+import numpy as np
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+import os
+import pandas as pd
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+import ipywidgets as widgets 
+from IPython.display import display, HTML, Javascript
+from ipywidgets import HBox, VBox, Label, IntSlider, Dropdown, RadioButtons, Layout, Style 
+
 
 st.set_page_config(
     page_title="Life Cycle Assessment",
