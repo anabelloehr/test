@@ -19,6 +19,7 @@ from IPython.display import display, HTML, Javascript
 from ipywidgets import HBox, VBox, Label, IntSlider, Dropdown, RadioButtons, Layout, Style 
 
 
+
 st.set_page_config(
     page_title="Life Cycle Assessment",
 )
@@ -29,21 +30,25 @@ st.sidebar.title("Parameter")
 st.sidebar.header("1. Definition of goal and scope")
 
 # TAKE LIFESPAN INPUT
-Lifespan = st.sidebar.slider("Lifespan (a)", 5, 30, 12, help="Choose how many years will the car be used?", label_visibility="visible")  # min, max, default
+lifespan_input = st.sidebar.slider("Lifespan (a)", 5, 30, 12, help="Choose how many years will the car be used?", label_visibility="visible")  # min, max, default
 
 # TAKE MILEAGE INPUT
-Mileage = st.sidebar.slider("Mileage (10.000 km)", 1, 30, 12, help="How much mileage in thousand kilometer per year should be considered?", label_visibility="visible")  # min, max, default
+mileage_year_input = st.sidebar.slider("Mileage (10.000 km)", 1, 30, 12, help="How much mileage in thousand kilometer per year should be considered?", label_visibility="visible")  # min, max, default
 
 # TAKE URBAN LIVING INPUT
-Urban = st.sidebar.slider("Share of Urban Driving (%)", 0, 100, 50, step=5, help="What share is driven in urban areas? The rest is allocated to driving in the country (highway or country road)", label_visibility="visible")  # min, max, default
+share_urban_input = st.sidebar.slider("Share of Urban Driving (%)", 0, 100, 50, step=5, help="What share is driven in urban areas? The rest is allocated to driving in the country (highway or country road)", label_visibility="visible")  # min, max, default
 
 # TAKE CONSUMPTION INPUT
 # radio button
-consumption = st.sidebar.radio('Consumption (basis)', ('Manufacturer data', 'ADAC driving profiles', 'Or choose own percentage:'), help="How is the driving consumption estimated? For the own percentage option: choose % more or less than manufacturer")
-######die Werte für die Labels (maufacturer data 0.65, 1) einsetzen
+cons_types = {
+   'Manufacturer data': 0.65,
+   'ADAC driving profiles': 1,
+   'Or choose own percentage:': 0
+}
+cons_input = st.sidebar.selectbox("Hydrogen", cons_types.keys(), help="How is the driving consumption estimated? For the own percentage option: choose % more or less than manufacturer")
 
 # select number input
-consumption_percentage = st.sidebar.number_input("(% more or less than manufacturer)", -60, 60, 0, 5, label_visibility="collapsed")
+cons_free_input = st.sidebar.number_input("(% more or less than manufacturer)", -60, 60, 0, 5, label_visibility="collapsed")
 
 st.sidebar.markdown("")
 st.sidebar.markdown("")
@@ -55,39 +60,62 @@ st.sidebar.header("2. Life cycle inventory")
 ### SIDEBAR SECTION 2.1: PRODUCTION STAGE 
 # TAKE PRODUCTION INPUT
 st.sidebar.subheader ("Production Stage")
-select_production = st.sidebar.selectbox("Production", ['Electricity Mix', 'From renewable energy sources', 'Fossil fuel based'], help="How is the electricity for the production processes of the batteries, fuel cells and other materials generated?")
+cc_mat_prod_types = {
+   'Electricity Mix': 'cc_normal',
+   'From renewable energy sources': 'cc_ee',
+   'Fossil fuel based': 'cc_worst'
+}
+
+cc_mat_prod_types_input = st.sidebar.selectbox("Production", cc_mat_prod_types.keys(), help="How is the electricity for the production processes of the batteries, fuel cells and other materials generated?")
 
 ### SIDEBAR SECTION 2.2: USE STAGE 
 st.sidebar.subheader ("Use Stage")
 
 # TAKE HYDROGEN INPUT
-select_hydrogen = st.sidebar.selectbox("Hydrogen", ['Natural Gas Reforming', 'Electrolysis from electricity mix', 'Electrolysis renewable energy sources'], help="How is the utilized hydrogen produced?")
-######die Werte für die Labels (13.3, 23, 0.866) einsetzen mit denen gerechnet wird
+hydrogen_prod_types = {
+   'Natural Gas Reforming': 13.3,
+   'Electrolysis from electricity mix': 23.0,
+   'Electrolysis renewable energy sources': 0.866
+}
+hydrogen_prod_input = st.sidebar.selectbox("Hydrogen", hydrogen_prod_types.keys(), help="How is the utilized hydrogen produced?")
 
 # TAKE ELECTRICITY INPUT
 # radio button
-electricity = st.sidebar.radio('Electricity', ('Electricity mix', 'From renewable energy sources', 'Fossil fuel based', 'Or choose shares [%]:'), help="How is the electricity used for charging produced?")
+cc_el_prod_types={
+   'Electricity mix':0.45128,
+   'From renewable energy sources':0.056,
+   'Fossil fuel based':1.018, 
+   'Or choose shares [%]:': 0
+   }
+
+cc_el_prod_types_input = st.sidebar.radio('Electricity', cc_el_prod_types.keys(), help="How is the electricity used for charging produced?")
 ######die Werte für die Labels einsetzen mit denen gerechnet wird
 
 # select number inputs
 el_pv_input = st.sidebar.number_input("PV:", 0, 100, 0, 1)
 el_wind_input = st.sidebar.number_input("Wind:", 0, 100, 0, 1)
 el_water_input = st.sidebar.number_input("Water:", 0, 100, 0, 1)
-el_biomass_input = st.sidebar.number_input("Biomass:", 0, 100, 0, 1)
+el_bio_input = st.sidebar.number_input("Biomass:", 0, 100, 0, 1)
 el_lignite_input = st.sidebar.number_input("Lignite:", 0, 100, 0, 1)
-el_hard_coal_input = st.sidebar.number_input("Hard Coal:", 0, 100, 0, 1)
+el_hardcoal_input = st.sidebar.number_input("Hard Coal:", 0, 100, 0, 1)
 el_nuclear_input = st.sidebar.number_input("Nuclear:", 0, 100, 0, 1)
-el_natural_gas_input = st.sidebar.number_input("Natural Gas:", 0, 100, 0, 1)
+el_ngas_input = st.sidebar.number_input("Natural Gas:", 0, 100, 0, 1)
 
-######rausfinden ob die number inputs verbinden kann/muss, zB als 1 variable
 
+if cc_el_prod_types[cc_el_prod_types_input] == 0:
+    if (el_pv_input + el_wind_input + el_water_input + el_bio_input + el_lignite_input + el_hardcoal_input + el_nuclear_input + el_ngas_input) != 100:
+        st.sidebar.write('The share for the electricity generation has to equal 100%. Please adjust the numbers for "Electricity" in "Use Phase" accordingly.') 
+
+    else: cc_el_prod = (el_pv_input*0.11+ el_wind_input*0.15 + el_water_input*0.04+ el_bio_input* 0.02+ el_lignite_input *1.227 +el_hardcoal_input*1.123 +  el_nuclear_input*0.011 + el_ngas_input*0.72)/100      
+else: 
+    cc_el_prod = cc_el_prod_types[cc_el_prod_types_input]
 
 ## SIDEBAR SECTION 2.3: END OF LIFE STAGE 
 st.sidebar.subheader ("End of Life Stage")
 
 # TAKE RECYCLING INPUT
 # radio button
-Recycling = st.sidebar.selectbox("Recycling type", ['Pyrometallurgy', 'Hydrometallurgy', 'Reuse'], help="What recycling process is utilized for the battery?")
+recyc_input = st.sidebar.selectbox("Recycling type", ['Pyrometallurgy', 'Hydrometallurgy', 'Reuse'], help="What recycling process is utilized for the battery?")
 
 st.sidebar.markdown("")
 st.sidebar.markdown("")
@@ -194,3 +222,18 @@ with tab2:
  #...chart"
  "...Hier kommt später ein Graph hin..."
 
+## Set variables
+share_urban = share_urban_input/100
+mileage_year = mileage_year_input*1000
+lifespan = lifespan_input #possibly redudant
+type_recycling = recyc_input #possibly redudant
+hydrogen_prod_value = hydrogen_prod_types[hydrogen_prod_input]
+
+if cons_types[cons_input]== 0:
+    cons_var = (100+cons_free_input)*0.65/100
+else:
+    cons_var = cons_types[cons_input]
+
+cc_mat_prod = cc_mat_prod_types[cc_mat_prod_types_input] 
+
+#print(cc_el_prod)
