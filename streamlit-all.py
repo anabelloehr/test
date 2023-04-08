@@ -3,7 +3,7 @@
 #... means this still needs to be figured out & added
 
 
-## Importing relevant libaries/modules
+##1: Importing relevant libaries/modules
 import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,6 +18,26 @@ import ipywidgets as widgets
 from IPython.display import display, HTML, Javascript
 from ipywidgets import HBox, VBox, Label, IntSlider, Dropdown, RadioButtons, Layout, Style 
 
+#4: material impact climate change, could be expanded to all impact categories
+cc_impact_prod=pd.read_excel('assets/excel/Input_LCA_TESA.xlsx', sheet_name = 'cc_impact_prod', index_col=[0], header=[0], usecols=[0,1,2,3,4], engine ='openpyxl')
+cc_impact_use=pd.read_excel('assets/excel/Input_LCA_TESA.xlsx', sheet_name = 'cc_impact_use', index_col=[0], header=[0], usecols=[0,1,2,3], engine ='openpyxl')
+
+#5: materials and car specifications
+amount_mat_ct1=pd.read_excel('assets/excel/Input_LCA_TESA.xlsx',sheet_name = 'mat_ct1', index_col=[0], header=[0], usecols=[0,2,3,4,5,6], engine ='openpyxl')
+car_specs_ct1=pd.read_excel('assets/excel/Input_LCA_TESA.xlsx',sheet_name = 'car_specs_ct1', index_col=[0], header=[0], usecols=[0,2,3,4,5,6], engine ='openpyxl')
+
+amount_mat_ct2=pd.read_excel('assets/excel/Input_LCA_TESA.xlsx',sheet_name = 'mat_ct2', index_col=[0], header=[0], usecols=[0,2,3,4,5,6], engine ='openpyxl')
+car_specs_ct2=pd.read_excel('assets/excel/Input_LCA_TESA.xlsx',sheet_name = 'car_specs_ct2', index_col=[0], header=[0], usecols=[0,2,3,4,5,6], engine ='openpyxl')
+
+amount_mat_ct3=pd.read_excel('assets/excel/Input_LCA_TESA.xlsx',sheet_name = 'mat_ct3', index_col=[0], header=[0], usecols=[0,2,3,4,5,6], engine ='openpyxl')
+car_specs_ct3=pd.read_excel('assets/excel/Input_LCA_TESA.xlsx',sheet_name = 'car_specs_ct3', index_col=[0], header=[0], usecols=[0,2,3,4,5,6], engine ='openpyxl')
+
+amount_mat_ct4=pd.read_excel('assets/excel/Input_LCA_TESA.xlsx',sheet_name = 'mat_ct4', index_col=[0], header=[0], usecols=[0,2,3,4,5,6], engine ='openpyxl')
+car_specs_ct4=pd.read_excel('assets/excel/Input_LCA_TESA.xlsx',sheet_name = 'car_specs_ct4', index_col=[0], header=[0], usecols=[0,2,3,4,5,6], engine ='openpyxl')
+
+#6
+amount_mat = [amount_mat_ct1, amount_mat_ct2,amount_mat_ct3,amount_mat_ct4]
+car_specs = [car_specs_ct1, car_specs_ct2,car_specs_ct3,car_specs_ct4]
 
 
 st.set_page_config(
@@ -45,7 +65,7 @@ cons_types = {
    'ADAC driving profiles': 1,
    'Or choose own percentage:': 0
 }
-cons_input = st.sidebar.selectbox("Hydrogen", cons_types.keys(), help="How is the driving consumption estimated? For the own percentage option: choose % more or less than manufacturer")
+cons_input = st.sidebar.selectbox("Consumption", cons_types.keys(), help="How is the driving consumption estimated? For the own percentage option: choose % more or less than manufacturer")
 
 # select number input
 cons_free_input = st.sidebar.number_input("(% more or less than manufacturer)", -60, 60, 0, 5, label_visibility="collapsed")
@@ -101,7 +121,7 @@ el_hardcoal_input = st.sidebar.number_input("Hard Coal:", 0, 100, 0, 1)
 el_nuclear_input = st.sidebar.number_input("Nuclear:", 0, 100, 0, 1)
 el_ngas_input = st.sidebar.number_input("Natural Gas:", 0, 100, 0, 1)
 
-
+# define variable
 if cc_el_prod_types[cc_el_prod_types_input] == 0:
     if (el_pv_input + el_wind_input + el_water_input + el_bio_input + el_lignite_input + el_hardcoal_input + el_nuclear_input + el_ngas_input) != 100:
         st.sidebar.write('The share for the electricity generation has to equal 100%. Please adjust the numbers for "Electricity" in "Use Phase" accordingly.') 
@@ -140,19 +160,20 @@ with tab1:
    "#### Climate change impact for the different life cycle stages"
     
     # SHOW PRODUCTION OUTPUT
-   with st.expander("Production"):
+   with st.expander("Production Phase"):
     # Füge den Inhalt des Bereichs hinzu
      st.write("Hier kommt später ein Graph hin")
     #...add chart
    
+   
    # SHOW USE OUTPUT
-   with st.expander("Use"):
+   with st.expander("Use Phase"):
     # Füge den Inhalt des Bereichs hinzu
      st.write("Hier kommt später ein Graph hin")
     #...add chart
    
    # SHOW END OUTPUT
-   with st.expander("End"):
+   with st.expander("End Phase"):
     # Füge den Inhalt des Bereichs hinzu
      st.write("Hier kommt später ein Graph hin")
     #...add chart
@@ -227,7 +248,7 @@ share_urban = share_urban_input/100
 mileage_year = mileage_year_input*1000
 lifespan = lifespan_input #possibly redudant
 type_recycling = recyc_input #possibly redudant
-hydrogen_prod_value = hydrogen_prod_types[hydrogen_prod_input]
+hydrogen_prod = hydrogen_prod_types[hydrogen_prod_input]
 
 if cons_types[cons_input]== 0:
     cons_var = (100+cons_free_input)*0.65/100
@@ -236,4 +257,157 @@ else:
 
 cc_mat_prod = cc_mat_prod_types[cc_mat_prod_types_input] 
 
-#print(cc_el_prod)
+#the setting of cc_el_prod happens ealier at the input point
+
+
+
+
+#13: drivetrain types and car types
+dt_ar = ['ICEV_petrol', 'ICEV_diesel','PHEV' ,'BEV', 'FCEV'] 
+ct_ar = ['small car', 'small family car', 'large family car', 'executive car']
+
+#14: Production process
+data_prod = np.array([np.arange(len(ct_ar))]*len(dt_ar)).T
+
+for ct_key in ct_ar:
+    i=ct_ar.index(ct_key) #cartype
+
+    for items, col in amount_mat[i].iteritems():
+    
+        lcascore_mat = (cc_impact_prod[cc_mat_prod]*((amount_mat[i][items])*car_specs[i][items]['weight'])).sum() #einfach
+
+        lcascore_bat_fc = (cc_impact_prod[cc_mat_prod]*car_specs[i][items]).sum() #battery, fuel cell and electricity for production
+
+        lcascore = lcascore_mat + lcascore_bat_fc
+
+        data_prod[i][dt_ar.index(items)] = lcascore
+
+h_prod_cc = pd.DataFrame(data_prod,index=ct_ar,columns=dt_ar) 
+
+
+#15: Use phase (per 100 km)
+
+data_use = np.array([np.arange(len(ct_ar))]*len(dt_ar)).T
+losses_el = (0.95*0.95*0.94)
+cc_petrol = cc_impact_use['climate change']['petrol'] #cc pro 1 liter
+cc_diesel = cc_impact_use['climate change']['diesel'] #cc pro 1 liter
+cc_el = cc_el_prod #cc per 1 kWh
+cc_hy = hydrogen_prod
+#cc_hy = cc_impact_use['climate change']['hydrogen'] #cc per 1 kWh        
+
+for dt_key in dt_ar:
+
+#petrol:
+    
+    if dt_key == 'ICEV_petrol':
+        
+        for ct_key in ct_ar:
+            i=ct_ar.index(ct_key)
+            cons_urban = car_specs[i][dt_key]['cons_urban']*cons_var
+            cons_land = car_specs[i][dt_key]['cons_land']*cons_var
+            
+            lcascore_use_km =(cons_urban * share_urban + cons_land* (1-share_urban)) * cc_petrol
+            data_use [ct_ar.index(ct_key)][dt_ar.index(dt_key)] = lcascore_use_km
+            
+    
+#diesel:
+    if dt_key == 'ICEV_diesel':
+        
+        for ct_key in ct_ar:
+            i=ct_ar.index(ct_key)
+            cons_urban = car_specs[i][dt_key]['cons_urban']*cons_var
+            cons_land = car_specs[i][dt_key]['cons_land']*cons_var
+
+            lcascore_use_km =(cons_urban * share_urban + cons_land* (1-share_urban)) * cc_diesel
+            data_use [ct_ar.index(ct_key)][dt_ar.index(dt_key)] = lcascore_use_km
+            
+#PHEV:
+    
+    if dt_key == 'PHEV':
+
+        for ct_key in ct_ar:
+            
+            i=ct_ar.index(ct_key)
+            cons_urban_l = car_specs[i][dt_key]['cons_urban']*cons_var
+            cons_land_l = car_specs[i][dt_key]['cons_land']*cons_var
+            cons_urban_el = car_specs[i][dt_key]['cons_urban_PHEV_el']*cons_var
+            cons_land_el = car_specs[i][dt_key]['cons_land_PHEV_el']*cons_var
+            
+            lcascore_use_km =(((cons_urban_l * share_urban + cons_land_l* (1-share_urban)) * cc_petrol) + ((cons_urban_el * share_urban + cons_land_el* (1-share_urban)) * cc_el/losses_el))
+            data_use [ct_ar.index(ct_key)][dt_ar.index(dt_key)] = lcascore_use_km             
+            
+#BEV:
+    
+    if dt_key == 'BEV':
+        
+        for ct_key in ct_ar:            
+            
+            i=ct_ar.index(ct_key)
+            cons_urban = car_specs[i][dt_key]['cons_urban']*cons_var
+            cons_land = car_specs[i][dt_key]['cons_land']*cons_var
+            
+            lcascore_use_km =(cons_urban * share_urban + cons_land* (1-share_urban)) * cc_el/losses_el
+            data_use [ct_ar.index(ct_key)][dt_ar.index(dt_key)] = lcascore_use_km        
+            
+            
+#FCEV:
+    
+    if dt_key == 'FCEV':
+        
+        for ct_key in ct_ar:
+            
+            i=ct_ar.index(ct_key)
+            cons_urban = car_specs[i][dt_key]['cons_urban']*cons_var
+            cons_land = car_specs[i][dt_key]['cons_land']*cons_var        
+            
+            lcascore_use_km =(cons_urban * share_urban + cons_land* (1-share_urban)) * cc_hy
+            data_use [ct_ar.index(ct_key)][dt_ar.index(dt_key)] = lcascore_use_km
+
+#co2-eq per 100 km    
+h_use_cc = pd.DataFrame(data_use/100,index=ct_ar,columns=dt_ar)
+
+#16: End of life
+data_eol = np.array([np.arange(len(ct_ar))]*len(dt_ar)).T
+
+e_density_bat = 0.135 #kWh/kg battery pack
+
+if type_recycling == 'Pyrometallurgy':
+    cc_recycling = 1.554/e_density_bat
+if type_recycling == 'Hydrometallurgy':
+    cc_recycling = 0.914/e_density_bat
+if type_recycling == 'Reuse':
+    cc_recycling = -3.551/e_density_bat
+
+for dt_key in dt_ar:
+    
+    for ct_key in ct_ar:
+        i=ct_ar.index(ct_key)
+        lcascore_eof = cc_recycling*car_specs[i][dt_key]['battery_base'] #*GrößeBatterie
+        
+        data_eol[ct_ar.index(ct_key)][dt_ar.index(dt_key)] = lcascore_eof     
+        
+         
+        
+h_eol_cc = pd.DataFrame(data_eol,index=ct_ar,columns=dt_ar)  
+
+#17: Total:
+total_cc = (h_prod_cc + h_use_cc * (mileage_year*lifespan) + h_eol_cc)
+
+#18:
+data1 = h_prod_cc/1000
+data2 = h_use_cc
+data3 = h_eol_cc
+data4 = total_cc/1000
+
+ #fig1, axes1 = plt.subplots()
+data1.plot(kind='bar')
+plt.title('Climate change impact for production stage')
+plt.xlabel('Type of car')
+plt.ylabel('Climate change per kilometer [t CO2-eq]')
+plt.legend(loc='upper left')
+plt.grid()
+plt.show()
+
+fig, ax = plt.subplots()
+ax.hist(data1, bins=20)
+st.pyplot(fig)
