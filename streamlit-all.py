@@ -39,6 +39,143 @@ car_specs_ct4=pd.read_excel('assets/excel/Input_LCA_TESA.xlsx',sheet_name = 'car
 amount_mat = [amount_mat_ct1, amount_mat_ct2,amount_mat_ct3,amount_mat_ct4]
 car_specs = [car_specs_ct1, car_specs_ct2,car_specs_ct3,car_specs_ct4]
 
+#definition funktion für button
+def results_LCA(cc_impact_prod, cc_mat_prod, cc_el_prod, hydrogen_prod, cons_var, type_recycling, mileage_year, lifespan): #write down same as when call function
+    #alle berechnungen
+    #13: drivetrain types and car types
+    dt_ar = ['ICEV_petrol', 'ICEV_diesel','PHEV' ,'BEV', 'FCEV'] 
+    ct_ar = ['small car', 'small family car', 'large family car', 'executive car']
+    
+    #14: Production process
+    data_prod = np.array([np.arange(len(ct_ar))]*len(dt_ar)).T
+
+    for ct_key in ct_ar:
+        i=ct_ar.index(ct_key) #cartype
+
+        for items, col in amount_mat[i].iteritems():
+        
+            lcascore_mat = (cc_impact_prod[cc_mat_prod]*((amount_mat[i][items])*car_specs[i][items]['weight'])).sum() #einfach
+
+            lcascore_bat_fc = (cc_impact_prod[cc_mat_prod]*car_specs[i][items]).sum() #battery, fuel cell and electricity for production
+
+            lcascore = lcascore_mat + lcascore_bat_fc
+
+            data_prod[i][dt_ar.index(items)] = lcascore
+
+    h_prod_cc = pd.DataFrame(data_prod,index=ct_ar,columns=dt_ar) 
+    
+
+    #15: Use phase (per 100 km)
+
+    data_use = np.array([np.arange(len(ct_ar))]*len(dt_ar)).T
+    losses_el = (0.95*0.95*0.94)
+    cc_petrol = cc_impact_use['climate change']['petrol'] #cc pro 1 liter
+    cc_diesel = cc_impact_use['climate change']['diesel'] #cc pro 1 liter
+    cc_el = cc_el_prod #cc per 1 kWh
+    cc_hy = hydrogen_prod
+    #cc_hy = cc_impact_use['climate change']['hydrogen'] #cc per 1 kWh        
+
+    for dt_key in dt_ar:
+
+    #petrol:
+        
+        if dt_key == 'ICEV_petrol':
+            
+            for ct_key in ct_ar:
+                i=ct_ar.index(ct_key)
+                cons_urban = car_specs[i][dt_key]['cons_urban']*cons_var
+                cons_land = car_specs[i][dt_key]['cons_land']*cons_var
+                
+                lcascore_use_km =(cons_urban * share_urban + cons_land* (1-share_urban)) * cc_petrol
+                data_use [ct_ar.index(ct_key)][dt_ar.index(dt_key)] = lcascore_use_km
+                
+        
+    #diesel:
+        if dt_key == 'ICEV_diesel':
+            
+            for ct_key in ct_ar:
+                i=ct_ar.index(ct_key)
+                cons_urban = car_specs[i][dt_key]['cons_urban']*cons_var
+                cons_land = car_specs[i][dt_key]['cons_land']*cons_var
+
+                lcascore_use_km =(cons_urban * share_urban + cons_land* (1-share_urban)) * cc_diesel
+                data_use [ct_ar.index(ct_key)][dt_ar.index(dt_key)] = lcascore_use_km
+                
+    #PHEV:
+        
+        if dt_key == 'PHEV':
+
+            for ct_key in ct_ar:
+                
+                i=ct_ar.index(ct_key)
+                cons_urban_l = car_specs[i][dt_key]['cons_urban']*cons_var
+                cons_land_l = car_specs[i][dt_key]['cons_land']*cons_var
+                cons_urban_el = car_specs[i][dt_key]['cons_urban_PHEV_el']*cons_var
+                cons_land_el = car_specs[i][dt_key]['cons_land_PHEV_el']*cons_var
+                
+                lcascore_use_km =(((cons_urban_l * share_urban + cons_land_l* (1-share_urban)) * cc_petrol) + ((cons_urban_el * share_urban + cons_land_el* (1-share_urban)) * cc_el/losses_el))
+                data_use [ct_ar.index(ct_key)][dt_ar.index(dt_key)] = lcascore_use_km             
+                
+    #BEV:
+        
+        if dt_key == 'BEV':
+            
+            for ct_key in ct_ar:            
+                
+                i=ct_ar.index(ct_key)
+                cons_urban = car_specs[i][dt_key]['cons_urban']*cons_var
+                cons_land = car_specs[i][dt_key]['cons_land']*cons_var
+                
+                lcascore_use_km =(cons_urban * share_urban + cons_land* (1-share_urban)) * cc_el/losses_el
+                data_use [ct_ar.index(ct_key)][dt_ar.index(dt_key)] = lcascore_use_km        
+                
+                
+    #FCEV:
+        
+        if dt_key == 'FCEV':
+            
+            for ct_key in ct_ar:
+                
+                i=ct_ar.index(ct_key)
+                cons_urban = car_specs[i][dt_key]['cons_urban']*cons_var
+                cons_land = car_specs[i][dt_key]['cons_land']*cons_var        
+                
+                lcascore_use_km =(cons_urban * share_urban + cons_land* (1-share_urban)) * cc_hy
+                data_use [ct_ar.index(ct_key)][dt_ar.index(dt_key)] = lcascore_use_km
+
+    #co2-eq per 100 km    
+    h_use_cc = pd.DataFrame(data_use/100,index=ct_ar,columns=dt_ar)
+
+    #16: End of life
+    data_eol = np.array([np.arange(len(ct_ar))]*len(dt_ar)).T
+
+    e_density_bat = 0.135 #kWh/kg battery pack
+
+    if type_recycling == 'Pyrometallurgy':
+        cc_recycling = 1.554/e_density_bat
+    if type_recycling == 'Hydrometallurgy':
+        cc_recycling = 0.914/e_density_bat
+    if type_recycling == 'Reuse':
+        cc_recycling = -3.551/e_density_bat
+
+    for dt_key in dt_ar:
+        
+        for ct_key in ct_ar:
+            i=ct_ar.index(ct_key)
+            lcascore_eof = cc_recycling*car_specs[i][dt_key]['battery_base'] #*GrößeBatterie
+            
+            data_eol[ct_ar.index(ct_key)][dt_ar.index(dt_key)] = lcascore_eof     
+            
+            
+            
+    h_eol_cc = pd.DataFrame(data_eol,index=ct_ar,columns=dt_ar)  
+
+    
+    #17: Total:
+    total_cc = (h_prod_cc + h_use_cc * (mileage_year*lifespan) + h_eol_cc)       
+    
+
+    return (h_prod_cc, h_use_cc, h_eol_cc, total_cc)
 
 st.set_page_config(
     page_title="Life Cycle Assessment",
@@ -141,8 +278,47 @@ st.sidebar.markdown("")
 st.sidebar.markdown("")
 st.sidebar.markdown("")
 
+## Set variables
+share_urban = share_urban_input/100
+mileage_year = mileage_year_input*1000
+lifespan = lifespan_input #possibly redudant
+type_recycling = recyc_input #possibly redudant
+hydrogen_prod = hydrogen_prod_types[hydrogen_prod_input]
+
+if cons_types[cons_input]== 0:
+    cons_var = (100+cons_free_input)*0.65/100
+else:
+    cons_var = cons_types[cons_input]
+
+cc_mat_prod = cc_mat_prod_types[cc_mat_prod_types_input] 
+
 # SIDEBAR: SET PARAMETERS
-st.sidebar.button('Set Parameters')
+if st.sidebar.button('Set Parameters'):
+    #h_prod_cc, h_use_cc, h_eol_cc, total_cc = results_LCA(cc_impact_prod, cc_mat_prod, cc_el_prod, hydrogen_prod, cons_var, type_recycling, mileage_year, lifespan)
+    arr_results = results_LCA(cc_impact_prod, cc_mat_prod, cc_el_prod, hydrogen_prod, cons_var, type_recycling, mileage_year, lifespan)
+    data1=arr_results[0]/1000 #h_prod_cc
+    data2=arr_results[1] #h_use_cc
+    data3=arr_results[2] #h_eol_cc
+    data4=arr_results[3]/1000 #total_cc
+
+
+    # in button steht array definition (eingabeparameter festlegen (durch funktion), arr_results, data1, grafische darstellung) 
+    # erst berechnungen und gucken ob ergebnisse gleich (vergleichen ob bei gleichen einstellungen gleiche ergebnisse mit print)
+
+    #18:
+    #data1 = h_prod_cc/1000
+    #data2 = h_use_cc
+    #data3 = h_eol_cc
+    #data4 = total_cc/1000
+
+    #fig1, axes1 = plt.subplots()
+    data1.plot(kind='bar')
+    plt.title('Climate change impact for production stage')
+    plt.xlabel('Type of car')
+    plt.ylabel('Climate change per kilometer [t CO2-eq]')
+    plt.legend(loc='upper left')
+    plt.grid()
+    plt.show()
 ########add was passiert on click
 
 
@@ -243,171 +419,17 @@ with tab2:
  #...chart"
  "...Hier kommt später ein Graph hin..."
 
-## Set variables
-share_urban = share_urban_input/100
-mileage_year = mileage_year_input*1000
-lifespan = lifespan_input #possibly redudant
-type_recycling = recyc_input #possibly redudant
-hydrogen_prod = hydrogen_prod_types[hydrogen_prod_input]
-
-if cons_types[cons_input]== 0:
-    cons_var = (100+cons_free_input)*0.65/100
-else:
-    cons_var = cons_types[cons_input]
-
-cc_mat_prod = cc_mat_prod_types[cc_mat_prod_types_input] 
-
-#the setting of cc_el_prod happens ealier at the input point
 
 
 
 
-#13: drivetrain types and car types
-dt_ar = ['ICEV_petrol', 'ICEV_diesel','PHEV' ,'BEV', 'FCEV'] 
-ct_ar = ['small car', 'small family car', 'large family car', 'executive car']
-
-#14: Production process
-data_prod = np.array([np.arange(len(ct_ar))]*len(dt_ar)).T
-
-for ct_key in ct_ar:
-    i=ct_ar.index(ct_key) #cartype
-
-    for items, col in amount_mat[i].iteritems():
-    
-        lcascore_mat = (cc_impact_prod[cc_mat_prod]*((amount_mat[i][items])*car_specs[i][items]['weight'])).sum() #einfach
-
-        lcascore_bat_fc = (cc_impact_prod[cc_mat_prod]*car_specs[i][items]).sum() #battery, fuel cell and electricity for production
-
-        lcascore = lcascore_mat + lcascore_bat_fc
-
-        data_prod[i][dt_ar.index(items)] = lcascore
-
-h_prod_cc = pd.DataFrame(data_prod,index=ct_ar,columns=dt_ar) 
 
 
-#15: Use phase (per 100 km)
 
-data_use = np.array([np.arange(len(ct_ar))]*len(dt_ar)).T
-losses_el = (0.95*0.95*0.94)
-cc_petrol = cc_impact_use['climate change']['petrol'] #cc pro 1 liter
-cc_diesel = cc_impact_use['climate change']['diesel'] #cc pro 1 liter
-cc_el = cc_el_prod #cc per 1 kWh
-cc_hy = hydrogen_prod
-#cc_hy = cc_impact_use['climate change']['hydrogen'] #cc per 1 kWh        
 
-for dt_key in dt_ar:
 
-#petrol:
-    
-    if dt_key == 'ICEV_petrol':
-        
-        for ct_key in ct_ar:
-            i=ct_ar.index(ct_key)
-            cons_urban = car_specs[i][dt_key]['cons_urban']*cons_var
-            cons_land = car_specs[i][dt_key]['cons_land']*cons_var
-            
-            lcascore_use_km =(cons_urban * share_urban + cons_land* (1-share_urban)) * cc_petrol
-            data_use [ct_ar.index(ct_key)][dt_ar.index(dt_key)] = lcascore_use_km
-            
-    
-#diesel:
-    if dt_key == 'ICEV_diesel':
-        
-        for ct_key in ct_ar:
-            i=ct_ar.index(ct_key)
-            cons_urban = car_specs[i][dt_key]['cons_urban']*cons_var
-            cons_land = car_specs[i][dt_key]['cons_land']*cons_var
 
-            lcascore_use_km =(cons_urban * share_urban + cons_land* (1-share_urban)) * cc_diesel
-            data_use [ct_ar.index(ct_key)][dt_ar.index(dt_key)] = lcascore_use_km
-            
-#PHEV:
-    
-    if dt_key == 'PHEV':
+#fig, ax = plt.subplots()
+#ax.hist(data1, bins=20)
+#st.pyplot(fig)
 
-        for ct_key in ct_ar:
-            
-            i=ct_ar.index(ct_key)
-            cons_urban_l = car_specs[i][dt_key]['cons_urban']*cons_var
-            cons_land_l = car_specs[i][dt_key]['cons_land']*cons_var
-            cons_urban_el = car_specs[i][dt_key]['cons_urban_PHEV_el']*cons_var
-            cons_land_el = car_specs[i][dt_key]['cons_land_PHEV_el']*cons_var
-            
-            lcascore_use_km =(((cons_urban_l * share_urban + cons_land_l* (1-share_urban)) * cc_petrol) + ((cons_urban_el * share_urban + cons_land_el* (1-share_urban)) * cc_el/losses_el))
-            data_use [ct_ar.index(ct_key)][dt_ar.index(dt_key)] = lcascore_use_km             
-            
-#BEV:
-    
-    if dt_key == 'BEV':
-        
-        for ct_key in ct_ar:            
-            
-            i=ct_ar.index(ct_key)
-            cons_urban = car_specs[i][dt_key]['cons_urban']*cons_var
-            cons_land = car_specs[i][dt_key]['cons_land']*cons_var
-            
-            lcascore_use_km =(cons_urban * share_urban + cons_land* (1-share_urban)) * cc_el/losses_el
-            data_use [ct_ar.index(ct_key)][dt_ar.index(dt_key)] = lcascore_use_km        
-            
-            
-#FCEV:
-    
-    if dt_key == 'FCEV':
-        
-        for ct_key in ct_ar:
-            
-            i=ct_ar.index(ct_key)
-            cons_urban = car_specs[i][dt_key]['cons_urban']*cons_var
-            cons_land = car_specs[i][dt_key]['cons_land']*cons_var        
-            
-            lcascore_use_km =(cons_urban * share_urban + cons_land* (1-share_urban)) * cc_hy
-            data_use [ct_ar.index(ct_key)][dt_ar.index(dt_key)] = lcascore_use_km
-
-#co2-eq per 100 km    
-h_use_cc = pd.DataFrame(data_use/100,index=ct_ar,columns=dt_ar)
-
-#16: End of life
-data_eol = np.array([np.arange(len(ct_ar))]*len(dt_ar)).T
-
-e_density_bat = 0.135 #kWh/kg battery pack
-
-if type_recycling == 'Pyrometallurgy':
-    cc_recycling = 1.554/e_density_bat
-if type_recycling == 'Hydrometallurgy':
-    cc_recycling = 0.914/e_density_bat
-if type_recycling == 'Reuse':
-    cc_recycling = -3.551/e_density_bat
-
-for dt_key in dt_ar:
-    
-    for ct_key in ct_ar:
-        i=ct_ar.index(ct_key)
-        lcascore_eof = cc_recycling*car_specs[i][dt_key]['battery_base'] #*GrößeBatterie
-        
-        data_eol[ct_ar.index(ct_key)][dt_ar.index(dt_key)] = lcascore_eof     
-        
-         
-        
-h_eol_cc = pd.DataFrame(data_eol,index=ct_ar,columns=dt_ar)  
-
-#17: Total:
-total_cc = (h_prod_cc + h_use_cc * (mileage_year*lifespan) + h_eol_cc)
-
-#18:
-data1 = h_prod_cc/1000
-data2 = h_use_cc
-data3 = h_eol_cc
-data4 = total_cc/1000
-
- #fig1, axes1 = plt.subplots()
-data1.plot(kind='bar')
-plt.title('Climate change impact for production stage')
-plt.xlabel('Type of car')
-plt.ylabel('Climate change per kilometer [t CO2-eq]')
-plt.legend(loc='upper left')
-plt.grid()
-plt.show()
-
-fig, ax = plt.subplots()
-ax.hist(data1, bins=20)
-st.pyplot(fig)
