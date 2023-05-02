@@ -39,13 +39,20 @@ car_specs_ct4=pd.read_excel('assets/excel/Input_LCA_TESA.xlsx',sheet_name = 'car
 amount_mat = [amount_mat_ct1, amount_mat_ct2,amount_mat_ct3,amount_mat_ct4]
 car_specs = [car_specs_ct1, car_specs_ct2,car_specs_ct3,car_specs_ct4]
 
+#13: drivetrain types and car types
+dt_ar = ['ICEV_petrol', 'ICEV_diesel','PHEV' ,'BEV', 'FCEV'] 
+ct_ar = ['small car', 'small family car', 'large family car', 'executive car']
+
+#define figures for the results graphs. the values are set through clicking the 'set parameters' button
+fig1=None
+fig2=None
+fig3=None
+fig4=None
+
 #definition funktion für button
 def results_LCA(cc_impact_prod, cc_mat_prod, cc_el_prod, hydrogen_prod, cons_var, type_recycling, mileage_year, lifespan): #write down same as when call function
     #alle berechnungen
-    #13: drivetrain types and car types
-    dt_ar = ['ICEV_petrol', 'ICEV_diesel','PHEV' ,'BEV', 'FCEV'] 
-    ct_ar = ['small car', 'small family car', 'large family car', 'executive car']
-    
+   
     #14: Production process
     data_prod = np.array([np.arange(len(ct_ar))]*len(dt_ar)).T
 
@@ -173,7 +180,18 @@ def results_LCA(cc_impact_prod, cc_mat_prod, cc_el_prod, hydrogen_prod, cons_var
     
     #17: Total:
     total_cc = (h_prod_cc + h_use_cc * (mileage_year*lifespan) + h_eol_cc)       
-    
+    print(lifespan)
+    print(cc_impact_prod)
+    print(cc_mat_prod)
+    print(cc_el_prod)
+    print(hydrogen_prod)
+    print(cons_var)
+    print(type_recycling)
+    print(mileage_year)
+    print(h_use_cc)
+    print(h_prod_cc)
+    print(h_eol_cc)
+    print(total_cc)
 
     return (h_prod_cc, h_use_cc, h_eol_cc, total_cc)
 
@@ -294,33 +312,63 @@ cc_mat_prod = cc_mat_prod_types[cc_mat_prod_types_input]
 
 # SIDEBAR: SET PARAMETERS
 if st.sidebar.button('Set Parameters'):
+    #funktion results_LCA wird getriggert die die parameter als variablen nimmt und die berechnungen als tables/arrays(?) outputtet 
+    #diese resultate werden in Array arr_results gespeichert
     #h_prod_cc, h_use_cc, h_eol_cc, total_cc = results_LCA(cc_impact_prod, cc_mat_prod, cc_el_prod, hydrogen_prod, cons_var, type_recycling, mileage_year, lifespan)
     arr_results = results_LCA(cc_impact_prod, cc_mat_prod, cc_el_prod, hydrogen_prod, cons_var, type_recycling, mileage_year, lifespan)
+    
+    #18:
+    #resultate an stellen im array werden dann in variablen, die für die graphen genutzt werden gespeichert
     data1=arr_results[0]/1000 #h_prod_cc
     data2=arr_results[1] #h_use_cc
     data3=arr_results[2] #h_eol_cc
     data4=arr_results[3]/1000 #total_cc
 
+    
+    #DEFINITION GRAPH PRODUCTION PHASE
+    #die resultate werden als graphen dargestellt
+    # Streamlit chart object erstellen
+    fig1, ax1 = plt.subplots()
 
-    # in button steht array definition (eingabeparameter festlegen (durch funktion), arr_results, data1, grafische darstellung) 
-    # erst berechnungen und gucken ob ergebnisse gleich (vergleichen ob bei gleichen einstellungen gleiche ergebnisse mit print)
+    # an die matplotlib funktion plot() übergeben um barchart zu erstellen
+    ax1 = data1.plot(kind='bar', ax=ax1)
 
-    #18:
-    #data1 = h_prod_cc/1000
-    #data2 = h_use_cc
-    #data3 = h_eol_cc
-    #data4 = total_cc/1000
+    # chart properties definieren mit set_*() funktion
+    ax1.set_title('Climate change impact for production stage')
+    ax1.set_xlabel('Type of car', color='#1C2833')
+    ax1.set_ylabel('Climate change per kilometer [t CO2-eq]', color='#1C2833')
+    ax1.legend(loc='upper left')
+    ax1.grid()
 
-    #fig1, axes1 = plt.subplots()
-    data1.plot(kind='bar')
-    plt.title('Climate change impact for production stage')
-    plt.xlabel('Type of car')
-    plt.ylabel('Climate change per kilometer [t CO2-eq]')
-    plt.legend(loc='upper left')
-    plt.grid()
-    plt.show()
-########add was passiert on click
+    #DEFINITION GRAPH USE PHASE
+    fig2, ax2 = plt.subplots()
+    ax2 = data2.plot(kind='bar', ax=ax2)
 
+    ax2.set_title('Climate change impact for use stage')
+    ax2.set_xlabel('Type of car', color='#1C2833')
+    ax2.set_ylabel('Climate change per kilometer [kg CO2-eq/km]', color='#1C2833')
+    ax2.legend(loc='upper left')
+    ax2.grid()
+
+    #DEFINITION GRAPH END PHASE
+    fig3, ax3 = plt.subplots()
+    ax3 = data3.plot(kind='bar', ax=ax3)
+
+    ax3.set_title('Climate change impact for end of life stage')
+    ax3.set_xlabel('Type of car', color='#1C2833')
+    ax3.set_ylabel('Climate change per kilometer [kg CO2-eq]', color='#1C2833')
+    ax3.legend(loc='upper left')
+    ax3.grid()
+
+    #DEFINITION GRAPH ENTIRE LIFE CYCLE
+    fig4, ax4 = plt.subplots()
+    ax4 = data4.plot(kind='bar', ax=ax4)
+
+    ax4.set_title('Climate change impact for entire life cycle')
+    ax4.set_xlabel('Type of car', color='#1C2833')
+    ax4.set_ylabel('Climate change per kilometer [t CO2-eq]', color='#1C2833')
+    ax4.legend(loc='upper left')
+    ax4.grid()
 
 # MAIN AREA
 st.title("Life cycle assessment mobility")
@@ -337,33 +385,40 @@ with tab1:
     
     # SHOW PRODUCTION OUTPUT
    with st.expander("Production Phase"):
-    # Füge den Inhalt des Bereichs hinzu
-     st.write("Hier kommt später ein Graph hin")
-    #...add chart
-   
-   
+    if fig1:
+        # if parameters have been set, display production phase chart
+        st.pyplot(fig1)
+    else:
+        st.write("To display the chart of the climate change impact for the production phase please set the parameters in the side bar.")
+
    # SHOW USE OUTPUT
    with st.expander("Use Phase"):
-    # Füge den Inhalt des Bereichs hinzu
-     st.write("Hier kommt später ein Graph hin")
-    #...add chart
+    if fig2:
+        # if parameters have been set, display use phase chart
+        st.pyplot(fig2)
+    else:
+        st.write("To display the chart of the climate change impact for the use phase please set the parameters in the side bar.")
    
    # SHOW END OUTPUT
    with st.expander("End Phase"):
-    # Füge den Inhalt des Bereichs hinzu
-     st.write("Hier kommt später ein Graph hin")
-    #...add chart
+    if fig3:
+        # if parameters have been set, display end of life phase chart
+        st.pyplot(fig3)
+    else:
+        st.write("To display the chart of the climate change impact for the end of life phase please set the parameters in the side bar.")
    
    # SHOW END LIFE CYCLE OUTPUT
    with st.expander("Entire Life Cycle"):
-    # Füge den Inhalt des Bereichs hinzu
-     st.write("Hier kommt später ein Graph hin")
-    #...add chart
+    if fig4:
+        # if parameters have been set, display entire life cycle chart
+        st.pyplot(fig4)
+    else:
+        st.write("To display the chart of the climate change impact for the entire life cycle please set the parameters in the side bar.")
 
 ## ANALYSIS TAB
 with tab2:
  st.header("Analysis")
- "To analyze and interpret the results in more detail..."
+ "To analyze and interpret the results in more detail, you have the possibility to compare the different vehicles with each other. Here you can select up to five cars with different drive trains and vehicle classes and compare their climate change impact in relation to the driven mileage."
  
  # TAKE CAR TYPE SETTINGS
  with st.expander("Choose types of cars and drives to compare:"):
@@ -371,54 +426,133 @@ with tab2:
      with st.container():
         col1, col2 = st.columns(2)
         with col1:
-            select_cartype1 = st.selectbox("Car Type:", ['None', '...'], key='car1.1')
+            car1_ct_input = st.selectbox("Car Type:", ['none', ct_ar[0],ct_ar[1], ct_ar[2], ct_ar[3]], key='car1.1')
         with col2:
-            select_drive1 = st.selectbox("Type of Drive Train:", ['ICEV petrol', '...'], key='car1.2')
+            car1_dt_input = st.selectbox("Type of Drive Train:", [dt_ar[0],dt_ar[1], dt_ar[2], dt_ar[3], dt_ar[4]], key='car1.2')
      
      "#### Car 2:"
      with st.container():
         col1, col2 = st.columns(2)
         with col1:
-            select_cartype2 = st.selectbox("Car Type:", ['None', '...'], key='car2.1')
+            car2_ct_input = st.selectbox("Car Type:", ['none', ct_ar[0],ct_ar[1], ct_ar[2], ct_ar[3]], key='car2.1')
 
         with col2:
-            select_drive2 = st.selectbox("Type of Drive Train:", ['ICEV petrol', '...'], key='car2.2')
+            car2_dt_input = st.selectbox("Type of Drive Train:", [dt_ar[0],dt_ar[1], dt_ar[2], dt_ar[3], dt_ar[4]], key='car2.2')
      
      "#### Car 3:"
      with st.container():
         col1, col2 = st.columns(2)
         with col1:
-            select_cartype3 = st.selectbox("Car Type:", ['None', '...'], key='car3.1')
+            car3_ct_input = st.selectbox("Car Type:", ['none', ct_ar[0],ct_ar[1], ct_ar[2], ct_ar[3]], key='car3.1')
         with col2:
-            select_drive3 = st.selectbox("Type of Drive Train:", ['ICEV petrol', '...'], key='car3.2')
+            car3_dt_input = st.selectbox("Type of Drive Train:", [dt_ar[0],dt_ar[1], dt_ar[2], dt_ar[3], dt_ar[4]], key='car3.2')
      
      "#### Car 4:"
      with st.container():
         col1, col2 = st.columns(2)
         with col1:
-            select_cartype4 = st.selectbox("Car Type:", ['None', '...'], key='car4.1')
+            car4_ct_input = st.selectbox("Car Type:", ['none', ct_ar[0],ct_ar[1], ct_ar[2], ct_ar[3]], key='car4.1')
 
         with col2:
-            select_drive4 = st.selectbox("Type of Drive Train:", ['ICEV petrol', '...'], key='car4.2')
+            car4_dt_input = st.selectbox("Type of Drive Train:", [dt_ar[0],dt_ar[1], dt_ar[2], dt_ar[3], dt_ar[4]], key='car4.2')
      
      "#### Car 5:"
      with st.container():
         col1, col2 = st.columns(2)
         with col1:
-            select_cartype5 = st.selectbox("Car Type:", ['None', '...'], key='car5.1')
+            car5_ct_input = st.selectbox("Car Type:", ['none', ct_ar[0],ct_ar[1], ct_ar[2], ct_ar[3]], key='car5.1')
         with col2:
-            select_drive5 = st.selectbox("Type of Drive Train:", ['ICEV petrol', '...'], key='car5.2')
+            car5_dt_input = st.selectbox("Type of Drive Train:", [dt_ar[0],dt_ar[1], dt_ar[2], dt_ar[3], dt_ar[4]], key='car5.2')
 
 # START ANALYSIS
- st.button('Start Analysis')
+ if st.button('Start Analysis'):
+    total_km = lifespan*mileage_year
+    st.write(total_km)
+    print(lifespan)
+    print(mileage_year)
+    print(total_km)
+
+    ct_1 = car1_ct_input
+    dt_1 = car1_dt_input
+    graph_car1 = []
+
+    ct_2 = car2_ct_input
+    dt_2 = car2_dt_input
+    graph_car2 = []
+
+
+    ct_3 = car3_ct_input
+    dt_3 = car3_dt_input
+    graph_car3 = []
+
+    ct_4 = car4_ct_input
+    dt_4 = car4_dt_input
+    graph_car4 = []
+
+
+    ct_5 = car5_ct_input
+    dt_5 = car5_dt_input
+    graph_car5 = []
+
+    plt.rcParams['figure.figsize'] = [45, 30]
+    plt.rcParams['figure.dpi'] = 95
+    plt.rcParams['font.size'] = 50
+
+    plt.rcParams['figure.subplot.bottom'] = 0.14
+    linewidth=10
+
+    fig, ax = plt.subplots(constrained_layout=True)
+
+
+
+    x = np.linspace(0,total_km,num=int(total_km/1000))
+
+    if ct_1 !='none':
+        graph_car1 = h_prod_cc[dt_1][ct_1] + h_use_cc[dt_1][ct_1] *x + h_eol_cc[dt_1][ct_1]
+        ax.plot(x/1000, graph_car1/1000, '-r', label='car 1: '+ct_1+ ' '+ dt_1, linewidth=linewidth)
+
+    if ct_2 !='none':   
+        graph_car2 = h_prod_cc[dt_2][ct_2] + h_use_cc[dt_2][ct_2] *x + h_eol_cc[dt_2][ct_2]
+        ax.plot(x/1000, graph_car2/1000, '-b', label='car 2: '+ct_2+ ' '+ dt_2, linewidth=linewidth)
+        
+    if ct_3 !='none': 
+        
+        graph_car3 = h_prod_cc[dt_3][ct_3] + h_use_cc[dt_3][ct_3] *x + h_eol_cc[dt_3][ct_3]
+        ax.plot(x/1000, graph_car3/1000, '-c', label='car 3: '+ct_3+ ' '+ dt_3, linewidth=linewidth)
+        
+    if ct_4 !='none': 
+        graph_car4 = h_prod_cc[dt_4][ct_4] + h_use_cc[dt_4][ct_4] *x + h_eol_cc[dt_4][ct_4]
+        ax.plot(x/1000, graph_car4/1000, '-y', label='car 4: '+ct_4+ ' '+ dt_4, linewidth=linewidth)
+            
+    if ct_5 !='none': 
+        graph_car5 = h_prod_cc[dt_5][ct_5] + h_use_cc[dt_5][ct_5] *x + h_eol_cc[dt_5][ct_5]
+        ax.plot(x/1000, graph_car5/1000, '-g', label='car 5: '+ct_5+ ' '+ dt_5, linewidth=linewidth)
+
+
+
+
+    def one_over(x):
+        return x*1000 / mileage_year
+    inverse = one_over
+    
+    ax.plot
+    #ax.set_title('Comparison climate change impact over life time')
+    ax.set_xlabel('Mileage [1000 km]')
+    ax.set_ylabel('Climate change [t CO2-eq]')
+    plt.legend(loc='upper left')
+    ax.set_ylim(ymin=0)
+    ax.set_xlim(xmin=0, xmax= total_km/1000 )
+
+    secax = ax.secondary_xaxis('top', functions=(one_over, inverse) )
+    secax.set_xlabel('Years [a]')
+
  st.markdown("""---""")
 
  # DISPLAY CHART TO COMPARE CARS
- "Here you can see and compare the different climate change impacts..."
+ "Here you can see and compare the different climate change impacts the choose cars have over their life time in dependence of their driven kilometers. The y-axis represents the emissions during the production and end of life stage, while the slope stands for the CO2-eq. emitted during the use phase per driven kilometer."
 
  #...chart"
  "...Hier kommt später ein Graph hin..."
-
 
 
 
