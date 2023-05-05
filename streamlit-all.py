@@ -48,6 +48,7 @@ fig1=None
 fig2=None
 fig3=None
 fig4=None
+fig5=None
 
 #definition funktion für button
 def results_LCA(cc_impact_prod, cc_mat_prod, cc_el_prod, hydrogen_prod, cons_var, type_recycling, mileage_year, lifespan): #write down same as when call function
@@ -195,6 +196,8 @@ def results_LCA(cc_impact_prod, cc_mat_prod, cc_el_prod, hydrogen_prod, cons_var
 
     return (h_prod_cc, h_use_cc, h_eol_cc, total_cc)
 
+
+
 st.set_page_config(
     page_title="Life Cycle Assessment",
 )
@@ -316,7 +319,7 @@ if st.sidebar.button('Set Parameters'):
     #diese resultate werden in Array arr_results gespeichert
     #h_prod_cc, h_use_cc, h_eol_cc, total_cc = results_LCA(cc_impact_prod, cc_mat_prod, cc_el_prod, hydrogen_prod, cons_var, type_recycling, mileage_year, lifespan)
     arr_results = results_LCA(cc_impact_prod, cc_mat_prod, cc_el_prod, hydrogen_prod, cons_var, type_recycling, mileage_year, lifespan)
-    
+
     #18:
     #resultate an stellen im array werden dann in variablen, die für die graphen genutzt werden gespeichert
     data1=arr_results[0]/1000 #h_prod_cc
@@ -372,7 +375,9 @@ if st.sidebar.button('Set Parameters'):
 
 # MAIN AREA
 st.title("Life cycle assessment mobility")
-"After the energy..."
+st.write("Analyse which factors have an influence on the results of greenhouse gas emissions for different vehicle classes and powertrains over their **whole life cycle**.")
+with st.expander("Learn more"):
+    st.write("After the energy and industrial sectors, the transport sector in Germany emits the most greenhouse gas emissions (GHG) in Germany, thus promoting anthropogenic climate change. One approach to reducing greenhouse gas emissions can be the electrification of the powertrain.  However, when comparing different powertrain technologies, not only the CO2 emissions during the use phase should be considered, but also **all greenhouse gas emissions (CO2-eq.) over the entire life cycle**. Many factors can play a role in this analysis. That is why many scientific life cycle assessment (LCA) studies have obtained differing results in the past few years.   \n  \nFor this, you have first the possibility to set the **parameters for the scenario setting (1.1)** and the **life cycle inventory (1.2)**. After you can see the **results for the different life cycle stages** and summed up **(2)** or to choose which type of cars with which power trains to **compare** directly **(3)**.\n\nHere only the climate change impact measured in CO2-eq is evaluated as an example. In a comprehensive analyses, the other impact categories should to be taken into account as well.")
 
 # SELECT TAB
 tab1, tab2 = st.tabs(["Results", "Analysis"])
@@ -380,7 +385,23 @@ tab1, tab2 = st.tabs(["Results", "Analysis"])
 ## RESULTS TAB
 with tab1:
    st.header("Results")
-   "The next phase..."
+   st.write("The next phase would be the life cycle impact assessment (LCIA). For computational reasons, this has been carried out beforehand for the various scenarios.  \n\nHere you can see the results for the different car types and the different drive types. First divided into the individual life cycle stages and then in total.")
+
+   with st.expander("Explanation of terms"):
+       "**The different drive types are:**" 
+       "**ICEV** = internal combustion engine vehicle (used with petrol or diesel)"
+       "**BEV** = battery electric vehicle"
+       "**PHEV** = plug-in hybrid electric vehicle"
+       "**FCEV** = fuel cell electric vehicle"
+       ""
+       "**The different types of cars and their German translation are:**"
+       "**small car** – Kleinwagen"
+       "**small family car** – Kompaktwagen"
+       "**large family car** – Mittelklasse"    
+       "**executive car** – Oberklasse"
+    
+
+
    "#### Climate change impact for the different life cycle stages"
     
     # SHOW PRODUCTION OUTPUT
@@ -418,8 +439,8 @@ with tab1:
 ## ANALYSIS TAB
 with tab2:
  st.header("Analysis")
- "To analyze and interpret the results in more detail, you have the possibility to compare the different vehicles with each other. Here you can select up to five cars with different drive trains and vehicle classes and compare their climate change impact in relation to the driven mileage."
- 
+ "To analyze and interpret the results in more detail, you have the possibility to **compare the different vehicles** with each other.  \nHere you can select up to five cars with different drive trains and vehicle classes and compare their climate change impact in relation to the driven mileage."
+
  # TAKE CAR TYPE SETTINGS
  with st.expander("Choose types of cars and drives to compare:"):
      "#### Car 1:"
@@ -465,13 +486,26 @@ with tab2:
             car5_dt_input = st.selectbox("Type of Drive Train:", [dt_ar[0],dt_ar[1], dt_ar[2], dt_ar[3], dt_ar[4]], key='car5.2')
 
 # START ANALYSIS
- if st.button('Start Analysis'):
-    total_km = lifespan*mileage_year
-    st.write(total_km)
-    print(lifespan)
-    print(mileage_year)
-    print(total_km)
 
+
+ st.markdown("""---""")
+
+ st.write("Here you can see and compare the different climate change impacts the choose cars have over their life time in dependence of their driven kilometers.  \nThe y-axis represents the emissions during the production and end of life stage, while the slope stands for the CO2-eq. emitted during the use phase per driven kilometer.")
+
+ if st.button('Start Analysis'):    
+    #assign the return values of results to variable
+    result = results_LCA(cc_impact_prod, cc_mat_prod, cc_el_prod, hydrogen_prod, cons_var, type_recycling, mileage_year, lifespan)
+
+    #unpack the return values into separate variables
+    h_prod_cc, h_use_cc, h_eol_cc, total_cc = result
+
+    total_km = lifespan*mileage_year
+    #print(lifespan)
+    #print(mileage_year)
+    #print(total_km)
+    
+    #put input from car selection into variables 
+    # create empty graph array for that
     ct_1 = car1_ct_input
     dt_1 = car1_dt_input
     graph_car1 = []
@@ -494,6 +528,7 @@ with tab2:
     dt_5 = car5_dt_input
     graph_car5 = []
 
+    #set visual parameters for the graphs
     plt.rcParams['figure.figsize'] = [45, 30]
     plt.rcParams['figure.dpi'] = 95
     plt.rcParams['font.size'] = 50
@@ -501,69 +536,94 @@ with tab2:
     plt.rcParams['figure.subplot.bottom'] = 0.14
     linewidth=10
 
-    fig, ax = plt.subplots(constrained_layout=True)
+    #create new figure
+    fig5, ax5 = plt.subplots(constrained_layout=True)
 
-
-
+    #create x-axis settings
     x = np.linspace(0,total_km,num=int(total_km/1000))
 
+    #wenn car type angegeben:
     if ct_1 !='none':
+        #fülle den graphen mit diesen werten & einstellungen
         graph_car1 = h_prod_cc[dt_1][ct_1] + h_use_cc[dt_1][ct_1] *x + h_eol_cc[dt_1][ct_1]
-        ax.plot(x/1000, graph_car1/1000, '-r', label='car 1: '+ct_1+ ' '+ dt_1, linewidth=linewidth)
+        # plot a line graph on the ax5 subplot, showing the relationship between the values of x and graph_car1 with a red line.
+        ax5.plot(x/1000, graph_car1/1000, '-r', label='car 1: '+ct_1+ ' '+ dt_1, linewidth=linewidth)
 
     if ct_2 !='none':   
         graph_car2 = h_prod_cc[dt_2][ct_2] + h_use_cc[dt_2][ct_2] *x + h_eol_cc[dt_2][ct_2]
-        ax.plot(x/1000, graph_car2/1000, '-b', label='car 2: '+ct_2+ ' '+ dt_2, linewidth=linewidth)
+        ax5.plot(x/1000, graph_car2/1000, '-b', label='car 2: '+ct_2+ ' '+ dt_2, linewidth=linewidth)
         
     if ct_3 !='none': 
         
         graph_car3 = h_prod_cc[dt_3][ct_3] + h_use_cc[dt_3][ct_3] *x + h_eol_cc[dt_3][ct_3]
-        ax.plot(x/1000, graph_car3/1000, '-c', label='car 3: '+ct_3+ ' '+ dt_3, linewidth=linewidth)
+        ax5.plot(x/1000, graph_car3/1000, '-c', label='car 3: '+ct_3+ ' '+ dt_3, linewidth=linewidth)
         
     if ct_4 !='none': 
         graph_car4 = h_prod_cc[dt_4][ct_4] + h_use_cc[dt_4][ct_4] *x + h_eol_cc[dt_4][ct_4]
-        ax.plot(x/1000, graph_car4/1000, '-y', label='car 4: '+ct_4+ ' '+ dt_4, linewidth=linewidth)
+        ax5.plot(x/1000, graph_car4/1000, '-y', label='car 4: '+ct_4+ ' '+ dt_4, linewidth=linewidth)
             
     if ct_5 !='none': 
         graph_car5 = h_prod_cc[dt_5][ct_5] + h_use_cc[dt_5][ct_5] *x + h_eol_cc[dt_5][ct_5]
-        ax.plot(x/1000, graph_car5/1000, '-g', label='car 5: '+ct_5+ ' '+ dt_5, linewidth=linewidth)
-
-
-
+        ax5.plot(x/1000, graph_car5/1000, '-g', label='car 5: '+ct_5+ ' '+ dt_5, linewidth=linewidth)
 
     def one_over(x):
         return x*1000 / mileage_year
     inverse = one_over
     
-    ax.plot
-    #ax.set_title('Comparison climate change impact over life time')
-    ax.set_xlabel('Mileage [1000 km]')
-    ax.set_ylabel('Climate change [t CO2-eq]')
-    plt.legend(loc='upper left')
-    ax.set_ylim(ymin=0)
-    ax.set_xlim(xmin=0, xmax= total_km/1000 )
+    # Set the title and axis labels for the graph
+    #ax5.set_title('Comparison climate change impact over life time')
+    ax5.set_xlabel('Mileage [1000 km]')
+    ax5.set_ylabel('Climate change [t CO2-eq]')
 
-    secax = ax.secondary_xaxis('top', functions=(one_over, inverse) )
+    # Add a legend to the graph
+    ax5.legend(loc='upper left')
+
+    ax5.set_ylim(ymin=0)
+    ax5.set_xlim(xmin=0, xmax= total_km/1000 )
+
+    secax = ax5.secondary_xaxis('top', functions=(one_over, inverse) )
     secax.set_xlabel('Years [a]')
 
- st.markdown("""---""")
+    ax5.grid()
 
- # DISPLAY CHART TO COMPARE CARS
- "Here you can see and compare the different climate change impacts the choose cars have over their life time in dependence of their driven kilometers. The y-axis represents the emissions during the production and end of life stage, while the slope stands for the CO2-eq. emitted during the use phase per driven kilometer."
+    #a = y-axis intercept
+    #b = slope 
 
- #...chart"
- "...Hier kommt später ein Graph hin..."
+    car_ar= (graph_car1,graph_car2, graph_car3, graph_car4, graph_car5)
+    car_ar_name = ['Car 1','Car 2', 'Car 3','Car 4','Car 5']
 
+    x1=[0,1,2,3,4]
 
+    # for i in x1:
+    #     if car_ar[i] != []:
+    #         a_i = car_ar[i][0]
+    #         b_i = car_ar[i][1]-car_ar[i][0]
 
+    #         for j in x1:
+    #             if car_ar[j] != []:
+    #                 if j>i:
+    #                     a_j = car_ar[j][0] 
+    #                     b_j = car_ar[j][1]-car_ar[j][0]
+    #                     #if b_j-b_i != 0:
+    #                     xij =(a_i-a_j)/(b_j-b_i) #intersection
 
+    #                     xij_int = xij.astype(int) #integer
 
+    #                     yij = a_j+xij*b_j
+    #                     yij_int = round(yij)
 
+    #                     if xij_int < 0:
+    #                         print(car_ar_name[i]+ ' and ' +car_ar_name[j] + ' have no intercept')
+    #                     else:
+    #                         print(car_ar_name[i] + ' and '+  car_ar_name[j] + ' intercept at', xij_int*1000, 'kilometer and climate change impact of',yij_int ,'kg CO2-eq.')              
+    #                     print(' ')
 
+    #         print(' ')
 
-
-
-#fig, ax = plt.subplots()
-#ax.hist(data1, bins=20)
-#st.pyplot(fig)
+# DISPLAY CHART TO COMPARE CARS
+ if fig5:
+    # if parameters have been set, display analysis chart
+    st.pyplot(fig5)
+ else:
+    st.write("")
 
