@@ -211,10 +211,10 @@ st.sidebar.header("1. Definition of goal and scope")
 lifespan_input = st.sidebar.slider("Lifespan (a)", 5, 30, 12, help="Choose how many years will the car be used?", label_visibility="visible")  # min, max, default
 
 # TAKE MILEAGE INPUT
-mileage_year_input = st.sidebar.slider("Mileage (10.000 km)", 1, 30, 12, help="How much mileage in thousand kilometer per year should be considered?", label_visibility="visible")  # min, max, default
+mileage_year_input = st.sidebar.slider("Mileage (1000 km)", 1, 30, 12, help="How much mileage in thousand kilometer per year should be considered?", label_visibility="visible")  # min, max, default
 
 # TAKE URBAN LIVING INPUT
-share_urban_input = st.sidebar.slider("Share of Urban Driving (%)", 0, 100, 50, step=5, help="What share is driven in urban areas? The rest is allocated to driving in the country (highway or country road)", label_visibility="visible")  # min, max, default
+share_urban_input = st.sidebar.slider("Share of urban driving (%)", 0, 100, 50, step=5, help="What share is driven in urban areas? The rest is allocated to driving in the country (highway or country road)", label_visibility="visible")  # min, max, default
 
 # TAKE CONSUMPTION INPUT
 # radio button
@@ -237,9 +237,9 @@ st.sidebar.header("2. Life cycle inventory")
 
 ### SIDEBAR SECTION 2.1: PRODUCTION STAGE 
 # TAKE PRODUCTION INPUT
-st.sidebar.subheader ("Production Stage")
+st.sidebar.subheader ("Production stage")
 cc_mat_prod_types = {
-   'Electricity Mix': 'cc_normal',
+   'Electricity mix': 'cc_normal',
    'From renewable energy sources': 'cc_ee',
    'Fossil fuel based': 'cc_worst'
 }
@@ -247,11 +247,11 @@ cc_mat_prod_types = {
 cc_mat_prod_types_input = st.sidebar.selectbox("Production", cc_mat_prod_types.keys(), help="How is the electricity for the production processes of the batteries, fuel cells and other materials generated?")
 
 ### SIDEBAR SECTION 2.2: USE STAGE 
-st.sidebar.subheader ("Use Stage")
+st.sidebar.subheader ("Use stage")
 
 # TAKE HYDROGEN INPUT
 hydrogen_prod_types = {
-   'Natural Gas Reforming': 13.3,
+   'Natural gas reforming': 13.3,
    'Electrolysis from electricity mix': 23.0,
    'Electrolysis renewable energy sources': 0.866
 }
@@ -269,15 +269,28 @@ cc_el_prod_types={
 cc_el_prod_types_input = st.sidebar.radio('Electricity', cc_el_prod_types.keys(), help="How is the electricity used for charging produced?")
 ######die Werte für die Labels einsetzen mit denen gerechnet wird
 
-# select number inputs
-el_pv_input = st.sidebar.number_input("PV:", 0, 100, 0, 1)
-el_wind_input = st.sidebar.number_input("Wind:", 0, 100, 0, 1)
-el_water_input = st.sidebar.number_input("Water:", 0, 100, 0, 1)
-el_bio_input = st.sidebar.number_input("Biomass:", 0, 100, 0, 1)
-el_lignite_input = st.sidebar.number_input("Lignite:", 0, 100, 0, 1)
-el_hardcoal_input = st.sidebar.number_input("Hard Coal:", 0, 100, 0, 1)
-el_nuclear_input = st.sidebar.number_input("Nuclear:", 0, 100, 0, 1)
-el_ngas_input = st.sidebar.number_input("Natural Gas:", 0, 100, 0, 1)
+
+# with st.sidebar.expander("Shares"):
+#     # select number inputs
+#     el_pv_input = st.number_input("PV:", 0, 100, 0, 1)
+#     el_wind_input = st.number_input("Wind:", 0, 100, 0, 1)
+#     el_water_input = st.number_input("Water:", 0, 100, 0, 1)
+#     el_bio_input = st.number_input("Biomass:", 0, 100, 0, 1)
+#     el_lignite_input = st.number_input("Lignite:", 0, 100, 0, 1)
+#     el_hardcoal_input = st.number_input("Hard coal:", 0, 100, 0, 1)
+#     el_nuclear_input = st.number_input("Nuclear:", 0, 100, 0, 1)
+#     el_ngas_input = st.number_input("Natural gas:", 0, 100, 0, 1)
+
+with st.expander("Summary of intercepts"):
+    # select number inputs
+    el_pv_input = st.sidebar.number_input("PV:", 0, 100, 0, 1)
+    el_wind_input = st.sidebar.number_input("Wind:", 0, 100, 0, 1)
+    el_water_input = st.sidebar.number_input("Water:", 0, 100, 0, 1)
+    el_bio_input = st.sidebar.number_input("Biomass:", 0, 100, 0, 1)
+    el_lignite_input = st.sidebar.number_input("Lignite:", 0, 100, 0, 1)
+    el_hardcoal_input = st.sidebar.number_input("Hard coal:", 0, 100, 0, 1)
+    el_nuclear_input = st.sidebar.number_input("Nuclear:", 0, 100, 0, 1)
+    el_ngas_input = st.sidebar.number_input("Natural gas:", 0, 100, 0, 1)
 
 # define variable
 if cc_el_prod_types[cc_el_prod_types_input] == 0:
@@ -289,7 +302,7 @@ else:
     cc_el_prod = cc_el_prod_types[cc_el_prod_types_input]
 
 ## SIDEBAR SECTION 2.3: END OF LIFE STAGE 
-st.sidebar.subheader ("End of Life Stage")
+st.sidebar.subheader ("End of life stage")
 
 # TAKE RECYCLING INPUT
 # radio button
@@ -314,7 +327,7 @@ else:
 cc_mat_prod = cc_mat_prod_types[cc_mat_prod_types_input] 
 
 # SIDEBAR: SET PARAMETERS
-if st.sidebar.button('Set Parameters'):
+if st.sidebar.button('Set parameters'):
     #funktion results_LCA wird getriggert die die parameter als variablen nimmt und die berechnungen als tables/arrays(?) outputtet 
     #diese resultate werden in Array arr_results gespeichert
     #h_prod_cc, h_use_cc, h_eol_cc, total_cc = results_LCA(cc_impact_prod, cc_mat_prod, cc_el_prod, hydrogen_prod, cons_var, type_recycling, mileage_year, lifespan)
@@ -594,36 +607,53 @@ with tab2:
 
     x1=[0,1,2,3,4]
 
-    # for i in x1:
-    #     if car_ar[i] != []:
-    #         a_i = car_ar[i][0]
-    #         b_i = car_ar[i][1]-car_ar[i][0]
-
-    #         for j in x1:
-    #             if car_ar[j] != []:
-    #                 if j>i:
-    #                     a_j = car_ar[j][0] 
-    #                     b_j = car_ar[j][1]-car_ar[j][0]
-    #                     #if b_j-b_i != 0:
-    #                     xij =(a_i-a_j)/(b_j-b_i) #intersection
-
-    #                     xij_int = xij.astype(int) #integer
-
-    #                     yij = a_j+xij*b_j
-    #                     yij_int = round(yij)
-
-    #                     if xij_int < 0:
-    #                         print(car_ar_name[i]+ ' and ' +car_ar_name[j] + ' have no intercept')
-    #                     else:
-    #                         print(car_ar_name[i] + ' and '+  car_ar_name[j] + ' intercept at', xij_int*1000, 'kilometer and climate change impact of',yij_int ,'kg CO2-eq.')              
-    #                     print(' ')
-
-    #         print(' ')
-
 # DISPLAY CHART TO COMPARE CARS
  if fig5:
     # if parameters have been set, display analysis chart
     st.pyplot(fig5)
+
+    with st.expander("Summary of intercepts"):
+        #a = y-axis intercept
+        #b = slope 
+
+        car_ar= (graph_car1,graph_car2, graph_car3, graph_car4, graph_car5)
+        car_ar_name = ['Car 1','Car 2', 'Car 3','Car 4','Car 5']
+
+        x1=[0,1,2,3,4]
+
+        for i in x1: #loop
+            if car_ar[i] != []: #wenn nicht leer
+                a_i = car_ar[i][0] #y-achsen abschnitt
+                b_i = car_ar[i][1]-car_ar[i][0] #steigung
+
+                for j in x1: #i ausgangsgraph, j vergleichsgraph
+                    if car_ar[j] != []:
+                        if j>i: #wenn noch nicht verglichen hat
+                            a_j = car_ar[j][0] 
+                            b_j = car_ar[j][1]-car_ar[j][0]
+                            
+                            #wo sich auf x treffen
+                            if b_j!=b_i:
+                                xij =(a_i-a_j)/(b_j-b_i) #intersection
+
+                                xij_int = xij.astype(int) #integer
+
+                                #wo sich auf y treffen
+                                yij = a_j+xij*b_j
+                                yij_int = round(yij)
+
+                                if xij_int < 0:
+                                    st.write(car_ar_name[i]+ ' and ' +car_ar_name[j] + ' have no intercept.')
+                                else:
+                                    st.write(car_ar_name[i] + ' and '+  car_ar_name[j] + ' intercept at', xij_int*1000, 'kilometer and climate change impact of',yij_int ,'kg CO2-eq.')              
+                                st.write(' ')
+                            else:
+                                st.write(car_ar_name[i]+ ' and ' +car_ar_name[j] + ' have no intercept.')
+                                st.write(' ')
+
+
+                
  else:
     st.write("")
+
 
