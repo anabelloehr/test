@@ -386,8 +386,17 @@ if st.sidebar.button('Set parameters'):
     ax4.legend(loc='upper left')
     ax4.grid()
 
+st.sidebar.markdown("---")
+
+st.sidebar.markdown("Chair for Energy System Economics")
+st.sidebar.markdown("(FCN-ESE)")
+st.sidebar.markdown("Prof. Dr.-Ing. Aaron Praktiknjo")
+st.sidebar.markdown("post_fcn-ese@eonerc.rwth-aachen.de")
+st.sidebar.image("/Users/admin/Documents/Lavoro/basic/rwth_eerc_logo_rgb.png")
+
 # MAIN AREA
-st.title("Life cycle assessment mobility")
+st.header("JERICHO")
+st.title("Life cycle assessment mobility tool")
 st.write("Analyse which factors have an influence on the results of greenhouse gas emissions for different vehicle classes and powertrains over their **whole life cycle**.")
 with st.expander("Learn more"):
     st.write("After the energy and industrial sectors, the transport sector in Germany emits the most greenhouse gas emissions (GHG) in Germany, thus promoting anthropogenic climate change. One approach to reducing greenhouse gas emissions can be the electrification of the powertrain.  However, when comparing different powertrain technologies, not only the CO2 emissions during the use phase should be considered, but also **all greenhouse gas emissions (CO2-eq.) over the entire life cycle**. Many factors can play a role in this analysis. That is why many scientific life cycle assessment (LCA) studies have obtained differing results in the past few years.   \n  \nFor this, you have first the possibility to set the **parameters for the scenario setting (1.1)** and the **life cycle inventory (1.2)**. After you can see the **results for the different life cycle stages** and summed up **(2)** or to choose which type of cars with which power trains to **compare** directly **(3)**.\n\nHere only the climate change impact measured in CO2-eq is evaluated as an example. In a comprehensive analyses, the other impact categories should to be taken into account as well.")
@@ -655,5 +664,3 @@ with tab2:
                 
  else:
     st.write("")
-
-
