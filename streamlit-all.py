@@ -181,18 +181,18 @@ def results_LCA(cc_impact_prod, cc_mat_prod, cc_el_prod, hydrogen_prod, cons_var
     
     #17: Total:
     total_cc = (h_prod_cc + h_use_cc * (mileage_year*lifespan) + h_eol_cc)       
-    print(lifespan)
-    print(cc_impact_prod)
-    print(cc_mat_prod)
-    print(cc_el_prod)
-    print(hydrogen_prod)
-    print(cons_var)
-    print(type_recycling)
-    print(mileage_year)
-    print(h_use_cc)
-    print(h_prod_cc)
-    print(h_eol_cc)
-    print(total_cc)
+    # print(lifespan)
+    # print(cc_impact_prod)
+    # print(cc_mat_prod)
+    # print(cc_el_prod)
+    # print(hydrogen_prod)
+    # print(cons_var)
+    # print(type_recycling)
+    # print(mileage_year)
+    # print(h_use_cc)
+    # print(h_prod_cc)
+    # print(h_eol_cc)
+    # print(total_cc)
 
     return (h_prod_cc, h_use_cc, h_eol_cc, total_cc)
 
@@ -304,6 +304,7 @@ else:
 ## SIDEBAR SECTION 2.3: END OF LIFE STAGE 
 st.sidebar.subheader ("End of life stage")
 
+
 # TAKE RECYCLING INPUT
 # radio button
 recyc_input = st.sidebar.selectbox("Recycling type", ['Pyrometallurgy', 'Hydrometallurgy', 'Reuse'], help="What recycling process is utilized for the battery?")
@@ -407,7 +408,7 @@ tab1, tab2 = st.tabs(["Results", "Analysis"])
 ## RESULTS TAB
 with tab1:
    st.header("Results")
-   st.write("The next phase would be the life cycle impact assessment (LCIA). For computational reasons, this has been carried out beforehand for the various scenarios.  \n\nHere you can see the results for the different car types and the different drive types. First divided into the individual life cycle stages and then in total.")
+   st.write("The next phase would be the life cycle impact assessment (LCIA). \n\nHere you can see the results for the different car types and the different drive types. First divided into the individual life cycle stages and then in total.")
 
    with st.expander("Explanation of terms"):
        "**The different drive types are:**" 
@@ -461,7 +462,7 @@ with tab1:
 ## ANALYSIS TAB
 with tab2:
  st.header("Analysis")
- "To analyze and interpret the results in more detail, you have the possibility to **compare the different vehicles** with each other.  \nHere you can select up to five cars with different drive trains and vehicle classes and compare their climate change impact in relation to the driven mileage."
+ "To analyze and interpret the results in more detail, you have the possibility to **compare the different vehicles** with each other.   \nHere you can select up to five cars with different drive trains and vehicle classes and compare their climate change impact in relation to the driven mileage."
 
  # TAKE CAR TYPE SETTINGS
  with st.expander("Choose types of cars and drives to compare:"):
